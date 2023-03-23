@@ -30,7 +30,7 @@ export const Canvas = () => {
 
   return (
     <ReactFlowProvider>
-      <div className="w-full h-auto flex-1" ref={container}>
+      <div className="w-full h-auto flex-1 bg-gray-3" ref={container}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -41,9 +41,10 @@ export const Canvas = () => {
           onDragOver={onDragOver}
           onInit={setInstance}
           nodeTypes={nodeTypes}
+          fitView
         >
           <Controls />
-          <MiniMap />
+          <MiniMap className="bg-gray-1 text-gray-12" />
           <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
         </ReactFlow>
       </div>
