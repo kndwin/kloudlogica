@@ -1,5 +1,5 @@
 import "reactflow/dist/style.css";
-import { Suspense, useState, useRef, useCallback, Ref, useEffect } from "react";
+import { useState, useRef, useCallback, Ref, DragEventHandler } from "react";
 import { shallow } from "zustand/shallow";
 import ReactFlow, {
   MiniMap,
@@ -7,15 +7,10 @@ import ReactFlow, {
   Background,
   BackgroundVariant,
   ReactFlowProvider,
-  Handle,
-  Position,
-  Node,
   type ReactFlowInstance,
 } from "reactflow";
-import { Code } from "lucide-react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus as dark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
+import { nodeTypes } from "~/features/designer/nodes";
 import { useCanvasStore, CanvasState } from "./store";
 
 const selector = (state: CanvasState) => ({
@@ -25,10 +20,6 @@ const selector = (state: CanvasState) => ({
   onEdgesChange: state.onEdgesChange,
   onConnect: state.onConnect,
 });
-
-const nodeTypes = {
-  code: NodeCode,
-};
 
 export const Canvas = () => {
   const container = useRef<HTMLDivElement | null>(null);
@@ -71,15 +62,16 @@ const getId = () => `dndnode_${id++}`;
 const useCanvas = ({ container, instance }: UseCanvasProps) => {
   const addNode = useCanvasStore((s) => s.addNode);
 
-  const onDragOver = useCallback((event) => {
+  const onDragOver: DragEventHandler<HTMLDivElement> = useCallback((event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-  const onDrop = useCallback(
+  const onDrop: DragEventHandler<HTMLDivElement> = useCallback(
     (event) => {
       event.preventDefault();
 
+      //@ts-expect-error: onDrop container will be present
       const reactFlowBounds = container.current.getBoundingClientRect();
       const type = event.dataTransfer.getData("application/reactflow");
 
@@ -88,6 +80,7 @@ const useCanvas = ({ container, instance }: UseCanvasProps) => {
         return;
       }
 
+      //@ts-expect-error: onDrop instance will be present
       const position = instance.project({
         x: event.clientX - reactFlowBounds.left,
         y: event.clientY - reactFlowBounds.top,
@@ -109,23 +102,3 @@ const useCanvas = ({ container, instance }: UseCanvasProps) => {
     onDragOver,
   };
 };
-
-function NodeCode({ data }: { data: Node["data"] }) {
-  return (
-    <div className="py-1 shadow-md rounded bg-gray-1 border border-gray-8 text-gray-12 divide-y divide-gray-8">
-      <div className="px-2 py-1 text-sm font-bold flex gap-2 items-center">
-        <Code className="w-4 h-4" />
-        <p>Code</p>
-      </div>
-      <SyntaxHighlighter
-        language="javascript"
-        style={dark}
-        customStyle={{ margin: 0 }}
-      >
-        {"var hello = 'world'"}
-      </SyntaxHighlighter>
-      <Handle type="target" position={Position.Right} className="w-16" />
-      <Handle type="source" position={Position.Left} className="w-16" />
-    </div>
-  );
-}

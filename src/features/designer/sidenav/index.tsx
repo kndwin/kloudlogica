@@ -1,13 +1,15 @@
 import { Code } from "lucide-react";
 import { cva } from "class-variance-authority";
+import { DragEvent } from "react";
 
 import { textfield } from "~/components/ui/";
+import { NodeType } from "../nodes";
 
 const component = cva(
   "px-2 py-1 bg-indigo-4 rounded flex gap-2 items-center text-sm text-indigo-12 cursor-grab"
 );
 export const Sidenav = () => {
-  const onDragStart = (event, nodeType) => {
+  const onDragStart = (event: DragEvent, nodeType: NodeType) => {
     event.dataTransfer.setData("application/reactflow", nodeType);
     event.dataTransfer.effectAllowed = "move";
   };
